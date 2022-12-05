@@ -1,0 +1,6 @@
+int r;
+double pi;
+r = 5;
+pi = 3.14;
+area = pi * r * r;
+cir = pi * r + pi * r;

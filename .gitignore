@@ -1,0 +1,6 @@
+*.out
+*.yy.c
+*.yy.h
+*.tab.c
+*.tab.h
+.vscode
