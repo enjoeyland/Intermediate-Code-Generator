@@ -15,11 +15,19 @@ digit   [0-9]
 {comment}       ;
 {blank}         ;
 
+"int"|"double"  { strncpy(yylval.buf, yytext, 50); return TYPE;}
 
 {digit}+"."{digit}* |
 {digit}*"."{digit}+ { strncpy(yylval.buf, yytext, 50); return DOUBLE; }
 
-{letter}({letter}|{digit})* {strncpy(yylval.buf, yytext, 10); return VARIABLE;}
+{letter}({letter}|{digit})* {
+                                int id_len = yyleng > 10 ? 10 : yyleng;
+                                char limited_symbol[11];
+                                strncpy(limited_symbol, yytext, id_len);
+                                limited_symbol[id_len] = '\0';
+                                strncpy(yylval.buf, limited_symbol, 11); 
+                                return VARIABLE;
+                            }
 
 {digit}+            { strncpy(yylval.buf, yytext, 50); return INTEGER; }
 
