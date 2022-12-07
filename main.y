@@ -20,8 +20,10 @@
 
 
 %union {
-    char buf[50];
-    int val;
+    struct {
+        char text[50];
+        int type;
+    } buf;
 }
 
 %token  <buf>  INTEGER
@@ -37,7 +39,7 @@
 
 program:
     define ';' program
-    | body  { 
+    | body  {
                 printSymbolTable(stdout);
                 FILE* fp = fopen("sbt.out", "w");
                 printSymbolTable(fp);
@@ -53,14 +55,14 @@ body:
 define:
     TYPE VARIABLE   {
                         int size;
-                        if (strcmp($1, "int") == 0) {
+                        if (strcmp($1.text, "int") == 0) {
                             size = 4;
-                        } else if (strcmp($1, "double") == 0) {
+                        } else if (strcmp($1.text, "double") == 0) {
                             size = 8;
                         }
                         
-                        strncpy(symbolTable[symbolTableIndex].name, $2, 11);
-                        strncpy(symbolTable[symbolTableIndex].type, $1, 50);
+                        strncpy(symbolTable[symbolTableIndex].name, $2.text, 11);
+                        strncpy(symbolTable[symbolTableIndex].type, $1.text, 50);
                         symbolTable[symbolTableIndex].size = size;
                         symbolTableIndex++;
                     }
@@ -69,7 +71,7 @@ define:
 
 
 statement:  
-    VARIABLE '=' expression { gencode($1, $3, "", ""); }
+    VARIABLE '=' expression { gencode($1.text, $3.text, "", ""); }
     |
     ;
 
@@ -77,31 +79,31 @@ expression:
     INTEGER
     | DOUBLE
     | VARIABLE
-    | expression '+' expression { 
+    | expression '+' expression {
                                     char tmp[11];
-                                    newtemp(tmp); 
-                                    strncpy($$, tmp, 11);                              
-                                    gencode(tmp, $1, "+", $3);
+                                    newtemp(tmp);
+                                    strncpy($$.text, tmp, 11);                              
+                                    gencode(tmp, $1.text, "+", $3.text);
                                 }
     | expression '-' expression { 
                                     char tmp[11];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 11);                              
-                                    gencode(tmp, $1, "-", $3);
+                                    strncpy($$.text, tmp, 11);                              
+                                    gencode(tmp, $1.text, "-", $3.text);
                                 }
     | expression '*' expression { 
                                     char tmp[11];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 11);                              
-                                    gencode(tmp, $1, "*", $3);
+                                    strncpy($$.text, tmp, 11);                              
+                                    gencode(tmp, $1.text, "*", $3.text);
                                 }
     | expression '/' expression { 
                                     char tmp[11];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 11);                              
-                                    gencode(tmp, $1, "/", $3);
+                                    strncpy($$.text, tmp, 11);                              
+                                    gencode(tmp, $1.text, "/", $3.text);
                                 }
-    | '(' expression ')'    { strncpy($$, $2, 50); }
+    | '(' expression ')'    { strncpy($$.text, $2.text, 50); }
     ;
 
 %%
