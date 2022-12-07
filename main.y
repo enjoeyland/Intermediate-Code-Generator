@@ -26,9 +26,14 @@
 
 %%
 
+program:
+    program statement ';'
+    |
+    ;
+
 statement:  
     expression  { printf("%s\n", $1); }
-    | VARIABLE '=' expression ';' { gencode($1, $3, "", ""); }
+    | VARIABLE '=' expression   { gencode($1, $3, "", ""); }
     ;
 
 expression:
@@ -36,30 +41,30 @@ expression:
     | DOUBLE
     | VARIABLE
     | expression '+' expression { 
-                                    char tmp[50];
+                                    char tmp[10];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 50);                              
+                                    strncpy($$, tmp, 10);                              
                                     gencode(tmp, $1, "+", $3);
                                 }
     | expression '-' expression { 
-                                    char tmp[50];
+                                    char tmp[10];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 50);                              
+                                    strncpy($$, tmp, 10);                              
                                     gencode(tmp, $1, "-", $3);
                                 }
     | expression '*' expression { 
-                                    char tmp[50];
+                                    char tmp[10];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 50);                              
+                                    strncpy($$, tmp, 10);                              
                                     gencode(tmp, $1, "*", $3);
                                 }
     | expression '/' expression { 
-                                    char tmp[50];
+                                    char tmp[10];
                                     newtemp(tmp); 
-                                    strncpy($$, tmp, 50);                              
+                                    strncpy($$, tmp, 10);                              
                                     gencode(tmp, $1, "/", $3);
                                 }
-    | '(' expression ')' { strncpy($$, $2, 50); }
+    | '(' expression ')' { strncpy($$, $2, 10); }
     ;
 
 %%
