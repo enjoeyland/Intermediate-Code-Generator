@@ -15,7 +15,7 @@
     } typedef SymbolEntry;
     SymbolEntry symbolTable[100];
     int symbolTableIndex = 0;
-    void printSymbolTable();
+    void printSymbolTable(FILE*);
 %}
 
 
@@ -36,9 +36,14 @@
 %%
 
 program:
-    define ';' program 
-    | body              { printSymbolTable(); }
-    |
+    define ';' program
+    | body  { 
+                printSymbolTable(stdout);
+                FILE* fp = fopen("sbt.out", "w");
+                printSymbolTable(fp);
+                fclose(fp);
+            }     
+    |   
     ;
 
 body:
@@ -101,14 +106,13 @@ expression:
 
 %%
 
-void printSymbolTable() {
-    printf("\n");
-    printf("index| %10s| %8s|\toffset\n", "name", "type");
-    printf("---------------------------------------\n");
+void printSymbolTable(FILE* fp) {
+    fprintf(fp,"%10s| %8s|\toffset\n", "name", "type");
+    fprintf(fp, "---------------------------------------\n");
     int offset = 0;
     for (int i = 0; i < symbolTableIndex; i++) {
         SymbolEntry se = symbolTable[i];
-        printf("%3d  | %10s| %8s|\t%d\n", i + 1, se.name, se.type, offset);
+        fprintf(fp, "%10s| %8s|\t%d\n", se.name, se.type, offset);
         offset += se.size;
     }
 }
