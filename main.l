@@ -17,7 +17,7 @@ digit   [0-9]
 
 {letter}        { strncpy(yylval.buf, yytext, 50); return VARIABLE; }
 {digit}+        { strncpy(yylval.buf, yytext, 50); return INTEGER; }
-[\-+()=/*\n]    { return *yytext; }
+[\-+()=/*;]    { return *yytext; }
 {blank}         ;
 .               { char str[128]; sprintf(str, "lexical error %s", yytext); yyerror(str); }
 

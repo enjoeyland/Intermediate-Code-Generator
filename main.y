@@ -28,7 +28,7 @@
 
 statement:  
     expression  { printf("%s\n", $1); }
-    | VARIABLE '=' expression { gencode($1, $3, "", ""); }
+    | VARIABLE '=' expression ';' { gencode($1, $3, "", ""); }
     ;
 
 expression:
