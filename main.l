@@ -1,8 +1,10 @@
 %option header-file="lex.yy.h"
 
 %{
-#include "main.tab.h"
-void yyerror(char *);
+    #include "main.tab.h"
+    void yyerror(char *);
+
+    enum Type {T_INT, T_DOUBLE};
 %}
 
 comment #.*
@@ -15,21 +17,23 @@ digit   [0-9]
 {comment}       ;
 {blank}         ;
 
-"int"|"double"  { strncpy(yylval.buf.text, yytext, 50); return TYPE;}
+"int"       { yylval.buf.type = T_INT; strncpy(yylval.buf.text, yytext, 50); return TYPE;}
+"double"    { yylval.buf.type = T_DOUBLE; strncpy(yylval.buf.text, yytext, 50); return TYPE;}
 
 {digit}+"."{digit}* |
-{digit}*"."{digit}+ { strncpy(yylval.buf.text, yytext, 50); return DOUBLE; }
+{digit}*"."{digit}+ { yylval.buf.type = T_INT; strncpy(yylval.buf.text, yytext, 50); return DOUBLE; }
 
 {letter}({letter}|{digit})* {
                                 int id_len = yyleng > 10 ? 10 : yyleng;
                                 char limited_symbol[11];
                                 strncpy(limited_symbol, yytext, id_len);
                                 limited_symbol[id_len] = '\0';
-                                strncpy(yylval.buf.text, limited_symbol, 11); 
+                                strncpy(yylval.buf.text, limited_symbol, 11);
+
                                 return VARIABLE;
                             }
 
-{digit}+            { strncpy(yylval.buf.text, yytext, 50); return INTEGER; }
+{digit}+            { yylval.buf.type = T_INT; strncpy(yylval.buf.text, yytext, 50); return INTEGER; }
 
 [\-+()=/*;]         { return *yytext; }
 
@@ -45,6 +49,3 @@ void yyerror(char *s) {
 int yywrap(void) {
     return 1;
 }
-
-// .               { printf("lexical error %s", yytext); }
-// .               { char str[128]; sprintf(str, "lexical error %s", yytext); yyerror(str); }
