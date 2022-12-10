@@ -35,7 +35,7 @@ digit   [0-9]
 
 {digit}+            { yylval.buf.type = T_INT; strncpy(yylval.buf.text, yytext, 50); return INTEGER; }
 
-[\-+()=/*;]         { return *yytext; }
+[\-+()=/*;,]         { return *yytext; }
 
 {digit}+{letter}+   { char str[50]; sprintf(str, "lexical error %s", yytext); yyerror(str); }
 .                   { char str[50]; sprintf(str, "lexical error %s", yytext); yyerror(str); }

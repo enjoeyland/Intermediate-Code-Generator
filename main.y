@@ -21,6 +21,7 @@
     int symbolTableIndex = 0;
     void printSymbolTable(FILE*);
     SymbolEntry* getSymbolEntry(char*);
+    int insertSymbol(char*, char*, int);
 
     enum Type {T_INT, T_DOUBLE};
 
@@ -60,25 +61,14 @@ program:
     ;
 
 define:
-    TYPE VARIABLE  {
-                        int size;
-                        if (strcmp($1.text, "int") == 0) {
-                            size = 4;
-                        } else if (strcmp($1.text, "double") == 0) {
-                            size = 8;
-                        }
-                        strncpy(symbolTable[symbolTableIndex].name, $2.text, 11);
-                        strncpy(symbolTable[symbolTableIndex].type_name, $1.text, 50);
-                        symbolTable[symbolTableIndex].type =  $1.type;
-                        symbolTable[symbolTableIndex].size = size;
-                        symbolTableIndex++;
-                    }
+    TYPE varlist
     |
     ;
 
-/* variables:
-    variables ',' VARIABLE  {}
-    | VARIABLE {} */
+varlist:
+    VARIABLE { insertSymbol($1.text, $<buf>0.text, $<buf>0.type); }
+    | varlist ',' VARIABLE  { insertSymbol($3.text, $<buf>0.text, $<buf>0.type); }
+    
 
 body:
     statement ';' body
@@ -131,7 +121,7 @@ expression:
                                     $$.type = TYPE_CONV($1, $3);                       
                                     gencode($$.text, $1.text, "/", $3.text);
                                 }
-    | '(' expression ')'    { strncpy($$.text, $2.text, 50); }
+    | '(' expression ')'    { $$ = $2; }
     ;
 
 %%
@@ -154,6 +144,20 @@ SymbolEntry* getSymbolEntry(char* symbol) {
         }
     }
     return NULL;
+}
+
+int insertSymbol(char* name, char* type_name, int type) {
+    int size;
+    if (strcmp(type_name, "int") == 0) {
+        size = 4;
+    } else if (strcmp(type_name, "double") == 0) {
+        size = 8;
+    }
+    strncpy(symbolTable[symbolTableIndex].name, name, 11);
+    strncpy(symbolTable[symbolTableIndex].type_name, type_name, 50);
+    symbolTable[symbolTableIndex].type =  type;
+    symbolTable[symbolTableIndex].size = size;
+    symbolTableIndex++;
 }
 
 struct Buf type_conv_left(struct Buf a, struct Buf b) {
