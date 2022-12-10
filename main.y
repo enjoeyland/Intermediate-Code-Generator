@@ -4,13 +4,16 @@
     #include <stdio.h>
     #include <string.h>
     #include "lex.yy.h"
+
+    #define TYPE_CONV(a,b) ((a.type == T_DOUBLE || b.type == T_DOUBLE) ? T_DOUBLE : T_INT)
+
     void yyerror(char *);
     void gencode(char*, char*, char*, char*);
     void newtemp(char*);
 
     struct _SymbolEntry {
         char name[11];
-        char type_name[5];
+        char type_name[10];
         int type;
         int size;
     } typedef SymbolEntry;
@@ -56,12 +59,8 @@ program:
     |   
     ;
 
-body:
-    statement ';' body
-    |
-    ;
 define:
-    TYPE VARIABLE   {
+    TYPE VARIABLE  {
                         int size;
                         if (strcmp($1.text, "int") == 0) {
                             size = 4;
@@ -77,6 +76,14 @@ define:
     |
     ;
 
+/* variables:
+    variables ',' VARIABLE  {}
+    | VARIABLE {} */
+
+body:
+    statement ';' body
+    |
+    ;
 
 statement:  
     VARIABLE '=' expression { gencode($1.text, $3.text, "", ""); }
@@ -98,38 +105,31 @@ expression:
     | expression '+' expression {
                                     $1 = type_conv_left($1,$3);
                                     $3 = type_conv_left($3,$1);
-                                    char tmp[11];
-                                    newtemp(tmp);
-                                    strncpy($$.text, tmp, 11);                              
-                                    $$.type = ($1.type == T_DOUBLE || $3.type == T_DOUBLE) ? T_DOUBLE : T_INT;
-                                    gencode(tmp, $1.text, "+", $3.text);
+                                    newtemp($$.text);     
+                                    $$.type = TYPE_CONV($1, $3);                       
+                                    gencode($$.text, $1.text, "+", $3.text);
                                 }
     | expression '-' expression { 
                                     $1 = type_conv_left($1,$3);
                                     $3 = type_conv_left($3,$1);
-                                    char tmp[11];
-                                    newtemp(tmp); 
-                                    strncpy($$.text, tmp, 11);                              
-                                    $$.type = ($1.type == T_DOUBLE || $3.type == T_DOUBLE) ? T_DOUBLE : T_INT;
-                                    gencode(tmp, $1.text, "-", $3.text);
+                                    newtemp($$.text);
+                                    $$.type = TYPE_CONV($1, $3);                       
+                                    // $$.type = ($1.type == T_DOUBLE || $3.type == T_DOUBLE) ? T_DOUBLE : T_INT;
+                                    gencode($$.text, $1.text, "-", $3.text);
                                 }
     | expression '*' expression {
                                     $1 = type_conv_left($1,$3);
                                     $3 = type_conv_left($3,$1);
-                                    char tmp[11];
-                                    newtemp(tmp); 
-                                    strncpy($$.text, tmp, 11);                              
-                                    $$.type = ($1.type == T_DOUBLE || $3.type == T_DOUBLE) ? T_DOUBLE : T_INT;
-                                    gencode(tmp, $1.text, "*", $3.text);
+                                    newtemp($$.text);                             
+                                    $$.type = TYPE_CONV($1, $3);                       
+                                    gencode($$.text, $1.text, "*", $3.text);
                                 }
     | expression '/' expression { 
                                     $1 = type_conv_left($1,$3);
                                     $3 = type_conv_left($3,$1);
-                                    char tmp[11];
-                                    newtemp(tmp); 
-                                    strncpy($$.text, tmp, 11);                              
-                                    $$.type = ($1.type == T_DOUBLE || $3.type == T_DOUBLE) ? T_DOUBLE : T_INT;
-                                    gencode(tmp, $1.text, "/", $3.text);
+                                    newtemp($$.text);                           
+                                    $$.type = TYPE_CONV($1, $3);                       
+                                    gencode($$.text, $1.text, "/", $3.text);
                                 }
     | '(' expression ')'    { strncpy($$.text, $2.text, 50); }
     ;
